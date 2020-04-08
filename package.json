@@ -6,6 +6,9 @@
   "scripts": {
     "test": "exit 1"
   },
+  "bin": {
+    "tversion": "./index.js"
+  },
   "keywords": [
     "version",
     "tversion",
