@@ -1,20 +1,32 @@
 #!/bin/node
 
 const util = require('util');
-const exec = util.promisify(require('child_process').exec);
-const path = process.cwd();
+const childProcess = require('child_process');
+const exec = util.promisify(childProcess.exec);
 const method = process.argv[2];
+const tagPrefix = process.env.TVERSION_TAG_PREFIX || 'v';
+const tagSufix = process.env.TVERSION_TAG_SUFFIX || '';
+
+const getTagTokens = rawTag => {
+    const tagWithoutPrefix = rawTag.slice(tagPrefix.length, rawTag.length);
+    const tag = tagWithoutPrefix.slice(0, tagWithoutPrefix.length - tagSufix.length).trimRight();
+    const tokens = tag.split('.');
+    return tokens.map(token => Number.parseInt(token, 10));
+}
+
+const getTagByTokens = tokens => `${tagPrefix}${tokens.join('.')}${tagSufix}`;
 
 (async () => {
     try {
-        const { stdout: currentTag } = await exec(`cd ${path}; git describe --abbrev=0`);
-        let tokens = currentTag.split('.');
-        tokens[0] = tokens[0].slice(1, tokens[0].length);
-        tokens[2] = tokens[2].slice(0, tokens[2].length - 3);
-        tokens = tokens.map(token => Number.parseInt(token, 10));
+        let tokens = [0, 0, 0];
+
+        if (method !== 'init') {
+            const { stdout: currentTag } = await exec(`git describe --abbrev=0`);
+            tokens = getTagTokens(currentTag);
+        } 
 
         if (!method) {
-            console.log(currentTag);
+            console.log(getTagByTokens(tokens));
             return;
         }
 
@@ -22,8 +34,10 @@ const method = process.argv[2];
         if (method === 'minor') tokens[1]++;
         if (method === 'patch') tokens[2]++;
 
-        const newTag = `v${tokens.join('.')}`;
+        const newTag = getTagByTokens(tokens);
         await exec(`git tag -m ${newTag} ${newTag}`);
+
+        console.log(newTag);
     } catch (err) {
         console.log(err.message);
     }
