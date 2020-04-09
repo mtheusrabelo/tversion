@@ -7,9 +7,8 @@ const method = process.argv[2];
 const tagPrefix = process.env.TVERSION_TAG_PREFIX || 'v';
 const tagSufix = process.env.TVERSION_TAG_SUFFIX || '';
 
-const getTagTokens = rawTag => {
-    const tagWithoutPrefix = rawTag.slice(tagPrefix.length, rawTag.length);
-    const tag = tagWithoutPrefix.slice(0, tagWithoutPrefix.length - tagSufix.length).trimRight();
+const getTokensByTag = rawTag => {
+    const tag = rawTag.slice(tagPrefix.length, rawTag.length - tagSufix.length).trim();
     const tokens = tag.split('.');
     return tokens.map(token => Number.parseInt(token, 10));
 }
@@ -21,8 +20,8 @@ const getTagByTokens = tokens => `${tagPrefix}${tokens.join('.')}${tagSufix}`;
         let tokens = [0, 0, 0];
 
         if (method !== 'init') {
-            const { stdout: currentTag } = await exec(`git describe --abbrev=0`);
-            tokens = getTagTokens(currentTag);
+            const { stdout: currentTag } = await exec('git describe --abbrev=0');
+            tokens = getTokensByTag(currentTag);
         } 
 
         if (!method) {
