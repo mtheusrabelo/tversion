@@ -27,6 +27,3 @@ $ tversion minor # will generate a minor release tag
 
 ## License
 MIT
-
-## Author
-Matheus Freire Rabelo
