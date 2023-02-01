@@ -11,7 +11,7 @@ The problem is that outside of the JavaScript world, we lose our powers. With TV
 ## Install
 
 ```
-$ git clone git@github.com:matheusrabelo/tversion.git
+$ git clone git@github.com:mtheusrabelo/tversion.git
 $ cd tversion
 $ npm link
 ```
